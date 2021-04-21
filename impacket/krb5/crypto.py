@@ -424,8 +424,7 @@ class _AESEnctype(_SimplifiedEnctype):
     @classmethod
     def string_to_key(cls, string, salt, params):
         (iterations,) = unpack('>L', params or b'\x00\x00\x10\x00')
-        prf = lambda p, s: HMAC.new(p, s, SHA).digest()
-        seed = PBKDF2(string, salt, cls.seedsize, iterations, prf)
+        seed = PBKDF2(string, salt, cls.seedsize, iterations)
         tkey = cls.random_to_key(seed)
         return cls.derive(tkey, b'kerberos')
 
