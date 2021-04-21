@@ -28,6 +28,7 @@
 from __future__ import division
 from __future__ import print_function
 import socket
+import threading
 from struct import pack
 from threading import Timer, currentThread
 
@@ -947,6 +948,7 @@ class DCOMConnection:
     OID_DEL = {}
     OID_SET = {}
     PORTMAPS = {}
+    _DCOM_CONN_LOCK = threading.Lock()
 
     def __init__(self, target, username='', password='', domain='', lmhash='', nthash='', aesKey='', TGT=None, TGS=None,
                  authLevel=RPC_C_AUTHN_LEVEL_PKT_PRIVACY, oxidResolver=False, doKerberos=False, kdcHost=None):
@@ -1066,18 +1068,24 @@ class DCOMConnection:
         return DCOMConnection.PORTMAPS[self.__target]
 
     def disconnect(self):
-        if DCOMConnection.PINGTIMER is not None:
-            del(DCOMConnection.PORTMAPS[self.__target])
-            del(DCOMConnection.OID_SET[self.__target])
-            if len(DCOMConnection.PORTMAPS) == 0:
-                # This means there are no more clients using this object, kill it
-                DCOMConnection.PINGTIMER.cancel()
-                DCOMConnection.PINGTIMER.join()
-                DCOMConnection.PINGTIMER = None
-        if self.__target in INTERFACE.CONNECTIONS:
-            del(INTERFACE.CONNECTIONS[self.__target][currentThread().getName()])
-        self.__portmap.disconnect()
-        #print INTERFACE.CONNECTIONS
+        with self._DCOM_CONN_LOCK:
+            portmap = DCOMConnection.PORTMAPS.get(self.__target, None)
+            if portmap:
+                del (DCOMConnection.PORTMAPS[self.__target])
+            if DCOMConnection.PINGTIMER is not None:
+                if self.__target in DCOMConnection.OID_SET:
+                    del (DCOMConnection.OID_SET[self.__target])
+                if len(DCOMConnection.PORTMAPS) == 0:
+                    # This means there are no more clients using this object, kill it
+                    DCOMConnection.PINGTIMER.cancel()
+                    DCOMConnection.PINGTIMER.join()
+                    DCOMConnection.PINGTIMER = None
+            if self.__target in INTERFACE.CONNECTIONS:
+                current_thread_name = threading.currentThread().getName()
+                if current_thread_name in INTERFACE.CONNECTIONS[self.__target]:
+                    del (INTERFACE.CONNECTIONS[self.__target][current_thread_name])
+        if portmap:
+            portmap.disconnect()
 
 class CLASS_INSTANCE:
     def __init__(self, ORPCthis, stringBinding):
