@@ -857,7 +857,7 @@ class SMB3:
             raise Exception('Unsuccessful Login')
 
 
-    def login(self, user, password, domain = '', lmhash = '', nthash = ''):
+    def login(self, user, password, domain = '', lmhash = '', nthash = '', av_pair_flags_detector=False):
         # If we have hashes, normalize them
         if lmhash != '' or nthash != '':
             if len(lmhash) % 2:     lmhash = '0%s' % lmhash
@@ -968,7 +968,7 @@ class SMB3:
                         self._Session["ServerOSMinor"] = indexbytes(version,1)
                         self._Session["ServerOSBuild"] = struct.unpack('<H',version[2:4])[0]
 
-            type3, exportedSessionKey = ntlm.getNTLMSSPType3(auth, respToken['ResponseToken'], user, password, domain, lmhash, nthash)
+            type3, exportedSessionKey = ntlm.getNTLMSSPType3(auth, respToken['ResponseToken'], user, password, domain, lmhash, nthash, av_pair_flags_detector)
 
 
 
