@@ -948,7 +948,7 @@ class DCOMConnection:
     OID_DEL = {}
     OID_SET = {}
     PORTMAPS = {}
-    _DCOM_CONN_LOCK = threading.Lock()
+    _DCOM_CONN_LOCK = threading.RLock()
 
     def __init__(self, target, username='', password='', domain='', lmhash='', nthash='', aesKey='', TGT=None, TGS=None,
                  authLevel=RPC_C_AUTHN_LEVEL_PKT_PRIVACY, oxidResolver=False, doKerberos=False, kdcHost=None):
