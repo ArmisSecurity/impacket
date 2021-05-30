@@ -35,7 +35,7 @@ TEST_CASE = False # Only set to True when running Test Cases
 
 def computeResponse(flags, serverChallenge, clientChallenge, serverName, domain, user, password, lmhash='', nthash='',
                     use_ntlmv2=USE_NTLMv2, av_pair_flags_detector=False):
-    if av_pair_flags_detector:  # trigger the detector malformed flags structure
+    if av_pair_flags_detector:  # trigger the detector malformed flags structure (for ARMIS VMS SMBAvPairsFlagsScan)
         av_pairs = AV_PAIRS(serverName)
         av_pairs[NTLMSSP_AV_FLAGS] = 3 * b"\0"  # valid size is 4
         serverName = av_pairs.getData()
