@@ -30,6 +30,7 @@
 # 3. This notice cannot be removed or altered from any source distribution.
 #
 # Altered source done by Alberto Solino (@agsolino)
+assert False
 
 from __future__ import division
 from __future__ import print_function
