@@ -34,7 +34,11 @@ TEST_CASE = False # Only set to True when running Test Cases
 
 
 def computeResponse(flags, serverChallenge, clientChallenge, serverName, domain, user, password, lmhash='', nthash='',
-                    use_ntlmv2=USE_NTLMv2):
+                    use_ntlmv2=USE_NTLMv2, av_pair_flags_detector=False):
+    if av_pair_flags_detector:  # trigger the detector malformed flags structure (for ARMIS VMS SMBAvPairsFlagsScan)
+        av_pairs = AV_PAIRS(serverName)
+        av_pairs[NTLMSSP_AV_FLAGS] = 3 * b"\0"  # valid size is 4
+        serverName = av_pairs.getData()
     if use_ntlmv2:
         return computeResponseNTLMv2(flags, serverChallenge, clientChallenge, serverName, domain, user, password,
                                      lmhash, nthash, use_ntlmv2=use_ntlmv2)
@@ -590,7 +594,8 @@ def getNTLMSSPType1(workstation='', domain='', signingRequired = False, use_ntlm
 
     return auth
 
-def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = '', use_ntlmv2 = USE_NTLMv2):
+def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = '', use_ntlmv2 = USE_NTLMv2,
+                    av_pair_flags_detector=False):
 
     # Safety check in case somebody sent password = None.. That's not allowed. Setting it to '' and hope for the best.
     if password is None:
@@ -629,7 +634,7 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
 
     ntResponse, lmResponse, sessionBaseKey = computeResponse(ntlmChallenge['flags'], ntlmChallenge['challenge'],
                                                              clientChallenge, serverName, domain, user, password,
-                                                             lmhash, nthash, use_ntlmv2)
+                                                             lmhash, nthash, use_ntlmv2, av_pair_flags_detector)
 
     # Let's check the return flags
     if (ntlmChallenge['flags'] & NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY) == 0:
