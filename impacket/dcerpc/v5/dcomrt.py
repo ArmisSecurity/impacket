@@ -951,7 +951,8 @@ class DCOMConnection:
     _DCOM_CONN_LOCK = threading.RLock()
 
     def __init__(self, target, username='', password='', domain='', lmhash='', nthash='', aesKey='', TGT=None, TGS=None,
-                 authLevel=RPC_C_AUTHN_LEVEL_PKT_PRIVACY, oxidResolver=False, doKerberos=False, kdcHost=None):
+                 authLevel=RPC_C_AUTHN_LEVEL_PKT_PRIVACY, oxidResolver=False, doKerberos=False, kdcHost=None,
+                 timeout=None):
         self.__target = target
         self.__userName = username
         self.__password = password
@@ -966,7 +967,7 @@ class DCOMConnection:
         self.__oxidResolver = oxidResolver
         self.__doKerberos = doKerberos
         self.__kdcHost = kdcHost
-        self.initConnection()
+        self.initConnection(timeout)
 
     @classmethod
     def addOid(cls, target, oid):
@@ -1042,10 +1043,9 @@ class DCOMConnection:
                 if str(e).find('threads can only be started once') < 0:
                     raise e
 
-    def initConnection(self):
+    def initConnection(self, timeout):
         stringBinding = r'ncacn_ip_tcp:%s' % self.__target
-        rpctransport = transport.DCERPCTransportFactory(stringBinding)
-
+        rpctransport = transport.DCERPCTransportFactory(stringBinding, timeout)
         if hasattr(rpctransport, 'set_credentials') and len(self.__userName) >=0:
             # This method exists only for selected protocol sequences.
             rpctransport.set_credentials(self.__userName, self.__password, self.__domain, self.__lmhash, self.__nthash,
@@ -1086,6 +1086,13 @@ class DCOMConnection:
                     del (INTERFACE.CONNECTIONS[self.__target][current_thread_name])
         if portmap:
             portmap.disconnect()
+
+    def set_transport_timeout(self, timeout):
+        self.__portmap.get_rpc_transport().set_connect_timeout(timeout)
+        self.__portmap.get_rpc_transport().get_socket().settimeout(timeout)
+
+    def get_transport_timeout(self):
+        return self.__portmap.get_rpc_transport().get_connect_timeout()
 
 class CLASS_INSTANCE:
     def __init__(self, ORPCthis, stringBinding):

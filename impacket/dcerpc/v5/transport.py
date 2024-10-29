@@ -27,6 +27,9 @@ from impacket.dcerpc.v5.rpcrt import DCERPCException, DCERPC_v5, DCERPC_v4
 from impacket.dcerpc.v5.rpch import RPCProxyClient, RPCProxyClientException, RPC_OVER_HTTP_v1, RPC_OVER_HTTP_v2
 from impacket.smbconnection import SMBConnection
 
+
+IMPACKET_DEFAULT_TRANSPORT_TIMEOUT = 30
+
 class DCERPCStringBinding:
     parser = re.compile(r'(?:([a-fA-F0-9-]{8}(?:-[a-fA-F0-9-]{4}){3}-[a-fA-F0-9-]{12})@)?' # UUID (opt.)
                         +'([_a-zA-Z0-9]*):' # Protocol Sequence
@@ -102,7 +105,7 @@ def DCERPCStringBindingCompose(uuid=None, protocol_sequence='', network_address=
 
     return s
 
-def DCERPCTransportFactory(stringbinding):
+def DCERPCTransportFactory(stringbinding, socket_timeout=IMPACKET_DEFAULT_TRANSPORT_TIMEOUT):
     sb = DCERPCStringBinding(stringbinding)
 
     na = sb.get_network_address()
@@ -139,6 +142,8 @@ def DCERPCTransportFactory(stringbinding):
         raise DCERPCException("Unknown protocol sequence.")
 
     rpctransport.set_stringbinding(sb)
+    if socket_timeout:
+        rpctransport.set_connect_timeout(socket_timeout)
     return rpctransport
 
 class DCERPCTransport:
