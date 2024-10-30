@@ -21,7 +21,7 @@ def read(fname):
 
 # This is based on version 0.9.23 of impacket, with re-versioning starting at 1.0.
 setup(name = PACKAGE_NAME,
-      version = "1.1.4",
+      version = "1.1.5",
       description = "Network protocols Constructors and Dissectors",
       url = "https://www.secureauth.com/labs/open-source-tools/impacket",
       author = "SecureAuth Corporation",
