@@ -21,7 +21,7 @@ def read(fname):
 
 # This is based on version 0.9.23 of impacket, with re-versioning starting at 1.0.
 setup(name = PACKAGE_NAME,
-      version = "1.1.5",
+      version = "1.1.6",
       description = "Network protocols Constructors and Dissectors",
       url = "https://www.secureauth.com/labs/open-source-tools/impacket",
       author = "SecureAuth Corporation",
@@ -37,7 +37,6 @@ setup(name = PACKAGE_NAME,
                 'impacket.examples.ntlmrelayx.clients', 'impacket.examples.ntlmrelayx.servers',
                 'impacket.examples.ntlmrelayx.servers.socksplugins', 'impacket.examples.ntlmrelayx.utils',
                 'impacket.examples.ntlmrelayx.attacks'],
-      scripts = glob.glob(os.path.join('examples', '*.py')),
       data_files = data_files,
       install_requires=['pyasn1>=0.2.3', 'pycryptodomex', 'pyOpenSSL>=0.13.1', 'six', 'ldap3>=2.5,!=2.5.2,!=2.5.0,!=2.6', 'ldapdomaindump>=0.9.0'],
       extras_require={
