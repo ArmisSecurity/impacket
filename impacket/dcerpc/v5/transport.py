@@ -378,10 +378,9 @@ class TCPTransport(DCERPCTransport):
         if count:
             buffer = b''
             while len(buffer) < count:
-                data = self.__socket.recv(count-len(buffer))
-                if not data:
+                buffer += self.__socket.recv(count-len(buffer))
+                if not buffer:
                     raise DCERPCException("Connection closed")
-                buffer += data
         else:
             buffer = self.__socket.recv(8192)
         return buffer
